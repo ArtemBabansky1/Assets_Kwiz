@@ -18,6 +18,16 @@
   // замени на реальную реферальную ссылку Tumodo.
   var SHARE_LINK = (typeof location !== "undefined" && location.href) ? location.href : "https://tumodo.com";
 
+  // Эндпоинт приёма заявки (Laravel QuizController::store, route quiz.index).
+  // При необходимости замени домен на реальный (учитывай get_site_dir()/локаль).
+  var FORM_ENDPOINT = "https://tumodo.io/quiz-form";
+
+  // Запомненные ответы по слайдам: { slideId: { key, label } }.
+  var ANSWERS = {};
+  // Накопленные значения полей форм (собираются по слайдам: trip-frequency + имя/телефон/
+  // e-mail/компания — на forma).
+  var FORM_DATA = {};
+
   // Разметка всех слайдов (вместе с их <style>). Показываем по одному за раз.
   var SLIDES = {
   "start": "<div class=\"kwiz kwiz--start\" id=\"kwiz-start\"><div class=\"kwiz__panel\"><div class=\"kwiz__inner\"><div class=\"kwiz-card kwiz-card--sm\"><svg class=\"kwiz-logo\" width=\"159\" height=\"25\" viewBox=\"0 0 159 25\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\" aria-label=\"Tumodo\"><path d=\"M123.084 16.2947C123.083 21.1737 118.9 22.0001 117.465 22.0001C115.914 22.0001 114.655 21.4765 113.689 20.4285C112.723 19.3812 112.239 17.9999 112.239 16.2856C112.239 15.1195 112.49 14.0714 112.991 13.1427C113.492 12.2142 114.196 11.4882 115.103 10.9642C116.009 10.441 117.023 10.1786 118.145 10.1786C119.339 10.1786 122.829 10.8955 123.084 15.4724V16.2947ZM101.305 19.3036C100.815 20.2206 100.142 20.9285 99.2825 21.4289C98.4237 21.9289 97.4573 22.1789 96.3833 22.1789C94.7371 22.1789 93.3826 21.6253 92.3209 20.5179C91.259 19.4109 90.7282 17.941 90.7282 16.1074C90.7282 14.2742 91.259 12.8035 92.3209 11.6966C93.3826 10.5892 94.7371 10.0356 96.3833 10.0356C97.4573 10.0356 98.4237 10.2856 99.2825 10.7856C100.142 11.286 100.815 11.9946 101.305 12.9109C101.794 13.8274 102.039 14.8928 102.039 16.1074C102.039 17.3217 101.794 18.3874 101.305 19.3036ZM141.052 10.0356H150.323V7.21445H141.052C139.405 7.21445 137.866 7.5838 136.435 8.32132C135.003 9.0597 133.864 10.1018 133.017 11.4466C132.169 12.7919 131.746 14.3455 131.746 16.1074C131.746 17.3708 131.972 18.5317 132.42 19.5936L128.232 21.3514C127.682 21.5834 127.237 21.3523 127.071 21.2421C126.906 21.1324 126.52 20.8127 126.52 20.217L126.52 0L123.084 0V9.49989C121.342 7.97635 119.433 7.21436 117.357 7.21436C115.426 7.21436 113.747 7.82395 112.762 8.46923C108.461 11.1515 105.947 12.0311 104.872 12.4011C104.723 12.0798 104.556 11.7666 104.365 11.4642C103.506 10.1073 102.366 9.0597 100.947 8.32132C99.5269 7.5838 98.0057 7.21445 96.3833 7.21445C94.7371 7.21445 93.1978 7.5838 91.7661 8.32132C90.3347 9.0597 89.1949 10.1018 88.3482 11.4466C87.5009 12.7919 87.0775 14.3455 87.0775 16.1074C87.0775 17.3354 87.2933 18.4658 87.716 19.5034L82.7939 21.5695C82.425 21.7248 82.1291 21.5883 81.9854 21.4934C81.8421 21.3984 81.6016 21.1792 81.6016 20.779V11.9881C81.6016 10.4729 80.8464 9.06763 79.5812 8.22912C78.3166 7.39042 76.7254 7.24137 75.3258 7.82872L68.8102 10.5634C68.4961 9.62175 67.8823 8.79498 67.0286 8.22912C65.7633 7.39042 64.1719 7.24137 62.7731 7.82872L56.1114 10.6254V7.70352H52.8224V18.3323L45.6296 21.3515C45.0796 21.5835 44.6343 21.3523 44.4684 21.2421C44.303 21.1324 43.9176 20.8127 43.9176 20.217V7.70352H40.6286V18.0531L32.7706 21.3515C32.2201 21.583 31.776 21.3519 31.6098 21.2425C31.4444 21.1324 31.059 20.8127 31.059 20.217V7.70352H27.7699V17.1057L17.6551 21.3515C17.105 21.5835 16.6597 21.3523 16.494 21.2421C16.3282 21.1324 15.9431 20.8127 15.9431 20.2173V10.4845H21.5067V7.66322H8.62146V10.4845H10.5442C11.7095 10.4845 12.654 11.427 12.654 12.5896V20.0532C12.654 21.6384 13.405 23.1688 14.7442 24.0216C15.482 24.4915 16.3255 24.7312 17.1749 24.7312C17.7683 24.7312 18.3649 24.6142 18.9302 24.3766L27.7971 20.6543C27.9275 21.9992 28.6482 23.219 29.7903 23.976C30.5442 24.476 31.4144 24.7312 32.2907 24.7312C32.8841 24.7312 33.4808 24.6142 34.0457 24.3766L40.8311 21.5281C41.1319 22.5172 41.7609 23.3875 42.6485 23.976C43.403 24.476 44.273 24.7312 45.1495 24.7312C45.7429 24.7312 46.3395 24.6142 46.9048 24.3766L52.8224 21.8924V24.5021H56.1114V14.1854L64.0481 10.8538C64.5995 10.6231 65.0435 10.8534 65.2089 10.9629C65.3743 11.0727 65.7598 11.3924 65.7598 11.9881V24.5021H69.0489V14.0239L76.601 10.8538C77.1526 10.6231 77.5966 10.8534 77.7616 10.9629C77.9271 11.0727 78.3126 11.3924 78.3126 11.9881V20.779C78.3126 22.1692 79.0055 23.458 80.1659 24.2272C80.8575 24.6859 81.6553 24.9199 82.4592 24.9199C83.0036 24.9199 83.5508 24.8124 84.0691 24.5945L89.5665 22.2866C90.2019 22.9258 90.933 23.4637 91.7661 23.8932C93.1978 24.6307 94.7371 25 96.3833 25C98.0536 25 99.5985 24.6307 101.019 23.8932C102.438 23.1551 103.566 22.1072 104.401 20.7503C105.236 19.393 105.654 17.8457 105.654 16.1074C105.654 15.8468 105.641 15.5917 105.622 15.3396C106.739 15.0277 107.843 14.5123 108.86 13.9322C108.68 14.689 108.588 15.4848 108.588 16.3213C108.588 17.9883 108.958 19.4822 109.698 20.8035C110.437 22.1251 111.434 23.1551 112.686 23.893C113.939 24.6307 115.293 25 116.749 25C118.037 25 119.807 24.6936 120.869 24.17C121.849 23.6865 122.834 23.0421 123.731 22.2721C124.079 22.9497 124.594 23.5403 125.251 23.976C126.006 24.476 126.876 24.7311 127.752 24.7311C128.346 24.7311 128.942 24.6142 129.508 24.3765L134.31 22.3603C134.928 22.9669 135.635 23.4804 136.435 23.8932C137.866 24.6307 139.405 25 141.052 25C142.722 25 144.267 24.6307 145.688 23.8932C147.106 23.1551 148.234 22.1072 149.07 20.7503C149.905 19.393 150.323 17.8457 150.323 16.1074C150.323 14.7644 150.063 13.536 149.55 12.4202H145.669C146.433 13.4489 146.708 14.8928 146.708 16.1074C146.708 17.3217 146.463 18.3874 145.974 19.3036C145.484 20.2206 144.81 20.9285 143.952 21.4289C143.092 21.9289 142.126 22.1789 141.052 22.1789C139.405 22.1789 138.051 21.6253 136.99 20.5179C135.927 19.4109 135.396 17.941 135.396 16.1074C135.396 14.2742 135.927 12.8035 136.99 11.6966C138.051 10.5892 139.405 10.0356 141.052 10.0356Z\" fill=\"#4F4F4F\"/><path d=\"M156.414 5.96147C157.84 5.96147 159 7.11965 159 8.54307C159 9.96653 157.84 11.1246 156.414 11.1246C154.987 11.1246 153.826 9.96653 153.826 8.54307C153.826 7.11965 154.987 5.96147 156.414 5.96147Z\" fill=\"#247CFF\"/><path d=\"M2.58722 6.42565C1.1607 6.42565 0 7.58388 0 9.0073C0 10.4307 1.1607 11.5889 2.58722 11.5889C4.01372 11.5889 5.17447 10.4307 5.17447 9.0073C5.17447 7.58388 4.01372 6.42565 2.58722 6.42565Z\" fill=\"#247CFF\"/><\/svg><h1 class=\"kwiz-title\">\n        Does your company send employees on&nbsp;<span class=\"kwiz-accent\">business trips?<\/span><\/h1><div class=\"kwiz-answers\"><button type=\"button\" class=\"kwiz-btn\" data-answer=\"yes\">Yes<\/button><button type=\"button\" class=\"kwiz-btn\" data-answer=\"no\">No<\/button><\/div><\/div><\/div><div class=\"kwiz-dots\" aria-hidden=\"true\"><span class=\"kwiz-dot kwiz-dot--active\"><\/span><span class=\"kwiz-dot\"><\/span><span class=\"kwiz-dot\"><\/span><span class=\"kwiz-dot\"><\/span><span class=\"kwiz-dot\"><\/span><span class=\"kwiz-dot\"><\/span><\/div><\/div><\/div><style>html{color-scheme:light dark}html,body{margin:0;padding:0}body{overflow-x:hidden}.kwiz,.kwiz *,.kwiz *::before,.kwiz *::after{box-sizing:border-box}.kwiz{--c-brand:#005AFF;--c-text:#4F4F4F;--c-bg:#F4F4F4;--c-card:#FFFFFF;--c-btn:#F3F3F3;--c-dot:#FFFFFF;--r-slide:30px;--r-card:30px;--r-pill:50px;--gap:10px;--pad-x:200px;--pad-y:200px;--maxw:1520px;position:relative;left:50%;right:50%;width:100vw;max-width:100vw;margin-left:-50vw;margin-right:-50vw;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;padding:var(--gap);background:transparent;font-family:'Nunito Sans',Arial,sans-serif;color:var(--c-text);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}.kwiz__panel{position:relative;flex:1 0 auto;display:flex;flex-direction:column;align-items:center;padding:var(--pad-y) var(--pad-x) clamp(40px,8vh,88px);background:var(--c-bg);border-radius:var(--r-slide);overflow:hidden}.kwiz__inner{flex:1 1 auto;width:100%;max-width:var(--maxw);min-height:0;display:flex;align-items:center;justify-content:center}.kwiz h1,.kwiz h2,.kwiz h3,.kwiz p{margin:0;padding:0;font-weight:400}.kwiz-img{background-position:center;background-repeat:no-repeat;background-size:contain}.kwiz-card{background:var(--c-card);border-radius:var(--r-card);display:flex;flex-direction:column;align-items:center;gap:50px;padding:60px;width:750px;max-width:100%;animation:kwiz-rise .6s ease both}.kwiz-card--sm{}.kwiz-logo{display:block;width:159px;height:25px;flex-shrink:0}.kwiz-title{font-size:40px;line-height:1.3;font-weight:400;text-align:center;color:var(--c-text);word-break:break-word}.kwiz-accent{color:var(--c-brand);font-weight:600}.kwiz-answers{display:flex;gap:10px;align-items:center}.kwiz-btn{font-family:inherit;font-size:20px;line-height:1;color:var(--c-text);background:var(--c-btn);border:none;border-radius:var(--r-pill);padding:13px 15px;min-width:80px;cursor:pointer;transition:background .2s ease,color .2s ease}.kwiz-btn--active,.kwiz-btn[aria-pressed=\"true\"]{background:var(--c-brand);color:#fff}@media (hover:hover){.kwiz-btn:hover{background:var(--c-brand);color:#fff}}.kwiz-dots{flex:0 0 auto;margin-top:clamp(24px,3.5vh,36px);display:flex;gap:10px}.kwiz-dot{width:15px;height:15px;border-radius:50%;background:var(--c-dot)}.kwiz-dot--active{background:var(--c-brand);animation:kwiz-dot-activate .4s ease .2s both}@keyframes kwiz-rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}@keyframes kwiz-dot-activate{from{background:var(--c-dot)}to{background:var(--c-brand)}}@media (prefers-reduced-motion:reduce){.kwiz-card,.kwiz-dot--active{animation:none}}@media (max-width:1280px){.kwiz{--pad-x:100px;--pad-y:100px}.kwiz-card{gap:40px;padding:48px}.kwiz-title{font-size:34px}}@media (max-width:1199px){.kwiz-card{gap:36px;padding:44px}.kwiz-title{font-size:30px}}@media (max-width:900px){.kwiz{--pad-x:60px;--pad-y:80px}}@media (max-width:640px){.kwiz{--pad-x:20px;--pad-y:64px}.kwiz-card{gap:32px;padding:32px 24px;border-radius:24px}.kwiz-title{font-size:26px}.kwiz-btn{font-size:18px}}@media (max-width:380px){.kwiz-title{font-size:22px}.kwiz-btn{font-size:16px}}@media (max-height:820px) and (min-width:1200px){.kwiz{--pad-y:80px}}@media (max-height:640px) and (min-width:1200px){.kwiz{--pad-y:40px}}<\/style>",
@@ -67,7 +77,9 @@
     form.addEventListener("submit", function(e){
       e.preventDefault();
       if (form.checkValidity && !form.checkValidity()){ flashInvalid(form); return; }
-      pick(id, "submit", form);
+      captureForm(form);
+      if (id === "forma") submitLead(id, form);
+      else pick(id, "submit", form);
     });
   }
   function bindAction(el){
@@ -79,6 +91,9 @@
 
   function pick(id, key, el){
     if (el && el.tagName === "BUTTON") el.setAttribute("aria-pressed", "true");
+    if (key !== "submit") {
+      ANSWERS[id] = { key: key, label: (el && el.textContent) ? el.textContent.trim() : key };
+    }
     var flow = FLOW[id] || {};
     var next = (key in flow) ? flow[key] : flow["*"];
     if (!next) return;
@@ -88,6 +103,63 @@
   function go(id){
     render(id);
     try { app.scrollIntoView({ block: "start" }); } catch(e){}
+  }
+
+  // Собрать значения именованных полей формы в FORM_DATA (накопительно по слайдам).
+  function captureForm(form){
+    var els = form.querySelectorAll("[name]");
+    for (var i = 0; i < els.length; i++){
+      var el = els[i];
+      var n = el.getAttribute("name");
+      if (!n) continue;
+      var t = (el.type || "").toLowerCase();
+      if ((t === "radio" || t === "checkbox") && !el.checked) continue;
+      var v = (el.value || "").trim();
+      if (v !== "") FORM_DATA[n] = v;
+    }
+  }
+
+  function answerKey(id){ return ANSWERS[id] ? ANSWERS[id].key : ""; }
+  function answerLabel(id){ return ANSWERS[id] ? ANSWERS[id].label : ""; }
+  // Ответ «как сейчас организованы командировки» — со слайда stage2 любой ветки.
+  function stage2Label(){
+    for (var k in ANSWERS){
+      if (ANSWERS.hasOwnProperty(k) && k.indexOf("stage2") === 0) return ANSWERS[k].label;
+    }
+    return "";
+  }
+
+  // Отправить заявку на бэкенд. Не блокируем подарок: при ошибке/таймауте
+  // всё равно переходим к финальному слайду.
+  function submitLead(id, form){
+    var btn = form.querySelector('button[type="submit"]');
+    if (btn) btn.setAttribute("disabled", "disabled");
+
+    var data = new FormData();
+    data.append("firstname", FORM_DATA["name"] || "");
+    data.append("phone", FORM_DATA["phone"] || "");
+    data.append("email", FORM_DATA["email"] || "");
+    data.append("company", FORM_DATA["company"] || "");
+    data.append("number_of_trips_month_string", FORM_DATA["trip-frequency"] || "");
+    // start: «отправляет ли компания сотрудников в командировки» (yes/no) → boolean на бэке.
+    data.append("does_your_company_send_employees_on_business_trips", answerKey("start") === "no" ? "" : "1");
+    // stage1: роль/должность пользователя.
+    data.append("jobtitle", answerLabel("stage1"));
+    data.append("how_does_your_company_manage_business_travel_now", stage2Label());
+
+    var navigated = false;
+    function proceed(){ if (navigated) return; navigated = true; pick(id, "submit", form); }
+
+    // Подстраховка от «висящей» сети — не задерживаем переход дольше 4 сек.
+    var timer = setTimeout(proceed, 4000);
+
+    if (typeof fetch === "function"){
+      fetch(FORM_ENDPOINT, { method: "POST", body: data, headers: { "Accept": "application/json" } })
+        .then(function(){ clearTimeout(timer); proceed(); }, function(){ clearTimeout(timer); proceed(); });
+    } else {
+      clearTimeout(timer);
+      proceed();
+    }
   }
 
   // подсветить незаполненные/невалидные поля формы оранжевым flash
