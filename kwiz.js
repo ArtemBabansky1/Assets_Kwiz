@@ -162,6 +162,37 @@
     wire(id);
     fitScale();                   // пересчитать «лупу» под текущее окно
     pushEvent(screenEvent(id));   // аналитика: эвент показа экрана
+    schedulePrefetch(id);         // в фоне тянем картинки следующих слайдов
+  }
+
+  // --------------------------------------------------------------------------
+  // Префетч картинок следующих слайдов. Пока пользователь читает текущий слайд,
+  // в фоне (idle) подгружаем изображения всех слайдов, достижимых из него по FLOW.
+  // При переходе они уже в кэше браузера → появляются мгновенно, без ожидания сети
+  // (и заодно заранее прогреваем кэш jsDelivr на нужном POP).
+  // --------------------------------------------------------------------------
+  var PREFETCHED = {};   // url → true, чтобы не запрашивать один файл повторно
+  function prefetchNext(id){
+    var nexts = FLOW[id] || {};
+    for (var k in nexts){
+      if (!nexts.hasOwnProperty(k)) continue;
+      var html = SLIDES[nexts[k]];
+      if (!html) continue;
+      var urls = html.match(/https:\/\/cdn\.jsdelivr\.net\/gh\/[^"')\s]+\.(?:webp|png|jpe?g)/gi);
+      if (!urls) continue;
+      for (var i = 0; i < urls.length; i++){
+        var u = urls[i];
+        if (PREFETCHED[u]) continue;
+        PREFETCHED[u] = true;
+        try { var img = new Image(); img.decoding = "async"; img.src = u; } catch(e){}
+      }
+    }
+  }
+  function schedulePrefetch(id){
+    var run = function(){ try { prefetchNext(id); } catch(e){} };
+    // requestIdleCallback — чтобы не конкурировать с загрузкой картинок текущего слайда
+    if (window.requestIdleCallback) window.requestIdleCallback(run, { timeout: 1500 });
+    else setTimeout(run, 250);
   }
 
   function wire(id){
