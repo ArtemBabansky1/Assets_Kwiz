@@ -21,6 +21,10 @@
   // При необходимости замени домен на реальный (учитывай get_site_dir()/локаль).
   var FORM_ENDPOINT = "https://tumodo.io/quiz-form";
 
+  // Эндпоинт выдачи гайда (Laravel QuizController::sendGift, route quiz.gift):
+  // принимает email + variant (роль stage1) и высылает на почту PDF-гайд под роль.
+  var GIFT_ENDPOINT = "https://tumodo.io/quiz-gift";
+
   // Запомненные ответы по слайдам: { slideId: { key, label } }.
   var ANSWERS = {};
   // Накопленные значения полей форм (собираются по слайдам: trip-frequency + имя/телефон/
@@ -230,7 +234,10 @@
         pushEvent("quiz_demo_submitted");                   // аналитика: отправил демо-заявку
         submitLead(id, form);
       } else {
-        if (id.indexOf("stage3") === 0) pushEvent("quiz_email_submitted"); // аналитика: оставил email
+        if (id.indexOf("stage3") === 0) {
+          pushEvent("quiz_email_submitted");                // аналитика: оставил email
+          sendGift(form);                                   // выслать PDF-гайд под роль на email
+        }
         pick(id, "submit", form);
       }
     });
@@ -415,6 +422,21 @@
       clearTimeout(timer);
       proceed();
     }
+  }
+
+  // Выслать PDF-гайд под выбранную роль на оставленный email (submit «Get a free guide»
+  // на stage3). Fire-and-forget: не блокирует переход на forma и не мешает подарку.
+  function sendGift(form){
+    var email = (FORM_DATA["email"] || "").trim();
+    var variant = answerKey("stage1");                       // роль stage1 = вариант гайда
+    if (!email || !variant || typeof fetch !== "function") return;
+
+    var data = new FormData();
+    data.append("email", email);
+    data.append("variant", variant);
+
+    fetch(GIFT_ENDPOINT, { method: "POST", body: data, headers: { "Accept": "application/json" } })
+      .then(function(){}, function(){});                     // ошибку глотаем — гайд не критичен для флоу
   }
 
   // подсветить незаполненные/невалидные поля формы оранжевым flash
