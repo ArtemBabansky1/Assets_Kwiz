@@ -136,8 +136,9 @@
           "position:absolute;top:50%;left:50%;width:1900px;height:1060px;" +
           "padding:200px 200px 88px;" +
           "transform:translate(-50%,-50%) scale(var(--kwiz-s,1));transform-origin:center center}" +
-        // точки пагинации — вне артборда, пиннятся к низу экрана на 100px (≥1200)
-        ".kwiz__panel>.kwiz-dots{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);margin:0;z-index:10}" +
+        // точки пагинации — внутри артборда (масштабируются «лупой» вместе с контентом),
+        // горизонтальный ряд в правом нижнем углу контентной зоны (≥1200)
+        ".kwiz__stage .kwiz-dots{position:absolute;right:200px;bottom:100px;margin:0;z-index:10}" +
       "}";
     var st = document.createElement("style");
     st.id = "kwiz-fit-style";
@@ -179,10 +180,8 @@
     if (!panel || panel.querySelector(":scope > .kwiz__stage")) return;
     var box = document.createElement("div");
     box.className = "kwiz__stage";
-    var dots = panel.querySelector(":scope > .kwiz-dots");   // точки — вне масштабируемого артборда (пиннятся к низу экрана на ≥1200)
-    while (panel.firstChild) box.appendChild(panel.firstChild);
+    while (panel.firstChild) box.appendChild(panel.firstChild);   // точки остаются внутри артборда — масштабируются вместе с контентом
     panel.appendChild(box);
-    if (dots) panel.appendChild(dots);
   }
 
   function render(id){
