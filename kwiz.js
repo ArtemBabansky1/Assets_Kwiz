@@ -152,6 +152,28 @@
     de.style.setProperty("--kwiz-s", String(s));
   }
 
+  // --------------------------------------------------------------------------
+  // Cookiebot (сторонний баннер на странице Tilda): на мобильных прижимаем
+  // диалог к низу экрана и ограничиваем высоту, чтобы он не перекрывал квиз.
+  // Правило действует на сайт (переопределение стилей баннера), не на сам
+  // скрипт Cookiebot. Если Cookiebot на странице нет — стиль просто ничего
+  // не матчит (безвредно).
+  // --------------------------------------------------------------------------
+  function ensureCookiebotStyle(){
+    if (document.getElementById("kwiz-cookiebot-style")) return;
+    var css =
+      "@media (max-width:768px){" +
+        "#CybotCookiebotDialog{" +
+          "top:auto !important;bottom:0 !important;transform:none !important;" +
+          "max-height:45vh !important;overflow-y:auto !important" +
+        "}" +
+      "}";
+    var st = document.createElement("style");
+    st.id = "kwiz-cookiebot-style";
+    st.appendChild(document.createTextNode(css));
+    document.head.appendChild(st);
+  }
+
   function wrapStage(root){
     var panel = root.querySelector(".kwiz__panel");
     if (!panel || panel.querySelector(":scope > .kwiz__stage")) return;
@@ -489,6 +511,7 @@
       document.body.appendChild(app);
     }
     ensureFitStyle();
+    ensureCookiebotStyle();
     window.addEventListener("resize", fitScale);
     fitScale();
     render(START);
