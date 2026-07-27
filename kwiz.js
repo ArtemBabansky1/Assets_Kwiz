@@ -127,20 +127,9 @@
   var KWIZ_REF_W = 1900, KWIZ_REF_H = 1060, KWIZ_GAP = 20;
 
   function ensureFitStyle(){
+    // тот же CSS уже инлайнится в kwiz-block.html (для мгновенного старта) — тогда тут no-op
     if (document.getElementById("kwiz-fit-style")) return;
-    var css =
-      ".kwiz__stage{display:contents}" +
-      "@media (min-width:1200px){" +
-        ".kwiz__panel{padding:0 !important}" +
-        ".kwiz__stage{display:flex;flex-direction:column;align-items:center;" +
-          "position:absolute;top:50%;left:50%;width:1900px;height:1060px;" +
-          "padding:200px 200px 88px;" +
-          "transform:translate(-50%,-50%) scale(var(--kwiz-s,1));transform-origin:center center}" +
-        // точки пагинации — вертикальная колонка у правого края ЭКРАНА (50px от границы),
-        // по центру по вертикали; ужимаются тем же коэффициентом «лупы», что и контент (≥1200)
-        ".kwiz__panel>.kwiz-dots{position:fixed;right:50px;top:50%;flex-direction:column;margin:0;z-index:10;" +
-          "transform:translateY(-50%) scale(var(--kwiz-s,1));transform-origin:right center}" +
-      "}";
+    var css = ".kwiz__stage{display:contents}@media (min-width:1200px){.kwiz__panel{padding:0 !important}.kwiz__stage{display:flex;flex-direction:column;align-items:center;position:absolute;top:50%;left:50%;width:1900px;height:1060px;padding:200px 200px 88px;transform:translate(-50%,-50%) scale(var(--kwiz-s,1));transform-origin:center center}.kwiz__panel>.kwiz-dots{position:fixed;right:50px;top:50%;flex-direction:column;margin:0;z-index:10;transform:translateY(-50%) scale(var(--kwiz-s,1));transform-origin:right center}}";
     var st = document.createElement("style");
     st.id = "kwiz-fit-style";
     st.appendChild(document.createTextNode(css));
@@ -520,7 +509,16 @@
     ensureCookiebotStyle();
     window.addEventListener("resize", fitScale);
     fitScale();
-    render(START);
+    if (app.querySelector(".kwiz")) {
+      // стартовый слайд уже инлайнен в блок (мгновенный первый экран) — не перерисовываем
+      // (иначе анимации входа проиграются второй раз), просто «оживляем» разметку
+      wrapStage(app);
+      wire(START);
+      pushEvent(screenEvent(START));
+      schedulePrefetch(START);
+    } else {
+      render(START);
+    }
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
