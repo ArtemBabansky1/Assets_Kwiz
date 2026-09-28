@@ -46,6 +46,7 @@
 
   // Человекочитаемые подписи эвентов (для console.log).
   var EVENT_LABELS = {
+    quiz_start_click:       "нажал Start quiz на вступительном экране",
     quiz_q1_business_trips: "первый вопрос",
     quiz_disqualified_no:   "ответил No → реферальный экран",
     quiz_q2_role:           "вопрос про роль",
@@ -614,6 +615,7 @@
     var flow = FLOW[id] || {};
     var next = (key in flow) ? flow[key] : flow["*"];
     if (!next) return;
+    if (id === "intro" && key === "start") pushEvent("quiz_start_click"); // аналитика: клик по Start quiz
     setTimeout(function(){ go(next); }, 200); // дать увидеть выбранное состояние
   }
 
