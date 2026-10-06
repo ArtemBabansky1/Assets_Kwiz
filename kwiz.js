@@ -1,8 +1,8 @@
 /* ============================================================================
    KWIZ · Tumodo — весь квиз (все слайды + роутер ветвления) в одном файле.
    Грузится в Tilda через крошечный блок-загрузчик (см. kwiz-block.html).
-   Сгенерировано dev/_build-tilda.mjs — правки вносить в исходные слайды и
-   пересобирать, НЕ редактировать этот файл руками.
+   Первоначально сгенерировано dev/_build-tilda.mjs. В этом репозитории нет
+   исходного сборщика; изменения роутера поддерживаются в этом файле.
    Картинки: jsDelivr (репо ArtemBabansky1/Assets_Kwiz@main, WebP).
    ============================================================================ */
 (function () {
@@ -35,6 +35,41 @@
   // Накопленные значения полей форм (собираются по слайдам: trip-frequency + имя/телефон/
   // e-mail/компания — на forma).
   var FORM_DATA = {};
+
+  // Capture campaign parameters before any navigation can remove them.
+  // Keep the campaign together: a new tagged URL replaces the previous set.
+  var UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "utm_id"];
+  var UTM_STORAGE_KEY = "tumodo_kwiz_utm";
+  var UTM_DATA = {};
+
+  function captureUtm(){
+    var params = new URLSearchParams(window.location.search);
+    var current = {};
+    UTM_KEYS.forEach(function(key){
+      var value = (params.get(key) || "").trim();
+      if (value) current[key] = value;
+    });
+    if (Object.keys(current).length) {
+      UTM_DATA = current;
+      try { window.sessionStorage.setItem(UTM_STORAGE_KEY, JSON.stringify(current)); } catch(e){}
+    } else if (!Object.keys(UTM_DATA).length) {
+      try {
+        var saved = JSON.parse(window.sessionStorage.getItem(UTM_STORAGE_KEY) || "{}");
+        UTM_KEYS.forEach(function(key){
+          if (saved && typeof saved[key] === "string" && saved[key].trim()) UTM_DATA[key] = saved[key].trim();
+        });
+      } catch(e){}
+    }
+  }
+
+  function appendUtm(data){
+    captureUtm();
+    UTM_KEYS.forEach(function(key){
+      if (UTM_DATA[key]) data.append(key, UTM_DATA[key]);
+    });
+  }
+
+  captureUtm();
 
   // --------------------------------------------------------------------------
   // Аналитика: на каждом шаге пушим свой event в window.dataLayer (GTM).
@@ -682,6 +717,7 @@
     // stage1: роль/должность пользователя.
     data.append("jobtitle", answerLabel("stage1"));
     data.append("how_does_your_company_manage_business_travel_now", stage2Label());
+    appendUtm(data);
 
     var navigated = false;
     function proceed(){ if (navigated) return; navigated = true; pick(id, "submit", form); }
@@ -708,6 +744,7 @@
     var data = new FormData();
     data.append("email", email);
     data.append("variant", variant);
+    appendUtm(data);
 
     fetch(GIFT_ENDPOINT, { method: "POST", body: data, headers: { "Accept": "application/json" } })
       .then(function(){}, function(){});                     // ошибку глотаем — гайд не критичен для флоу
